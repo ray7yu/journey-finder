@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
-import time
+import time, os
+from openpyxl import Workbook
 from selenium import webdriver
 
 driver = webdriver.Chrome('/usr/local/bin/chromedriver') 
@@ -35,6 +36,7 @@ if not attractions:
 attractions[1].click()
 
 '''Scrolls and makes more locations available'''
+print(driver.window_handles)
 time.sleep(3)
 see_more = driver.find_element_by_class_name('attractions-attraction-overview-main-TopPOIs__see_more--2Vsb-')
 #scrolls to element
@@ -62,4 +64,19 @@ print(reviews)
 
 '''End Scraper'''
 time.sleep(3) # Let the user actually see something!
-driver.quit()
+# driver.quit()
+
+'''Write to Excel file'''
+if names:
+    os.chdir('./files/')
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Tallahassee Points of Interest"
+    ws['A1'] = "Location Names"
+    ws['B1'] = "Review Count"
+    ws['C1'] = "Links"
+    for x in range(len(names)):
+        ws.cell(row=x+2,column=1,value=names[x])
+        ws.cell(row=x+2,column=2,value=reviews[x])
+        ws.cell(row=x+2,column=3,value=urls[x])
+    wb.save('tallahassee_tourism.xlsx')
