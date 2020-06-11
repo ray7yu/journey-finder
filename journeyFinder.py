@@ -36,15 +36,16 @@ if not attractions:
 attractions[1].click()
 
 '''Scrolls and makes more locations available'''
-print(driver.window_handles)
-time.sleep(3)
-see_more = driver.find_element_by_class_name('attractions-attraction-overview-main-TopPOIs__see_more--2Vsb-')
+#Fixes major bug by checking alternate class name
+see_more = driver.find_elements_by_class_name('attractions-attraction-overview-main-TopPOIs__see_more--2Vsb-')
+if not see_more:
+    see_more = driver.find_elements_by_class_name('_3EzqC0V4')
 #scrolls to element
-driver.execute_script("arguments[0].scrollIntoView();", see_more)
+driver.execute_script("arguments[0].scrollIntoView();", see_more[0])
 #scrolls a little up
 driver.execute_script("window.scrollBy(0, -80);")
 time.sleep(3)
-see_more.click()
+see_more[0].click()
 
 '''Collect attractions'''
 names = []
@@ -58,13 +59,40 @@ for a in anchors:
 numbers = driver.find_elements_by_class_name('reviewCount')
 for n in numbers:
     reviews.append(n.text)
-print(urls)
-print(names)
-print(reviews)
+# print(urls)
+# print(names)
+# print(reviews)
 
-'''End Scraper'''
-time.sleep(3) # Let the user actually see something!
-# driver.quit()
+'''Collect Restaurants'''
+driver.execute_script("window.scrollTo(0, 0)")
+restaurant = driver.find_elements_by_id('global-nav-restaurants')
+if not restaurant:
+    restaurant = driver.find_elements_by_class_name('_1T4t-FiN')
+    restaurant = restaurant[3]
+else:
+    restaurant = restaurant[0]
+restaurant.click()
+dining_names = []
+dining_categories = []
+dining_prices = []
+dining_reviews = []
+dining_urls = []
+
+# cards = driver.find_elements_by_class_name('_2Q7zqOgW')
+time.sleep(2)
+for d in driver.find_elements_by_class_name('_15_ydu6b'):
+    dining_names.append(d.text)
+    dining_urls.append(d.get_attribute('href'))
+dining_reviews = [r.text for r in driver.find_elements_by_class_name('w726Ki5B')]
+for style in driver.find_elements_by_class_name('_3d9EnJpt'):
+    stats = style.find_elements_by_class_name('EHA742uW')
+    dining_categories.append(stats[0].text)
+    dining_prices.append(stats[1].text)
+
+print(dining_categories)
+print(dining_prices)
+'''Quit driver'''
+driver.quit()
 
 '''Write to Excel file'''
 if names:
