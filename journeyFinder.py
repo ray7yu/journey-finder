@@ -1,8 +1,16 @@
 #! /usr/bin/env python3
+'''
+Raymond Yu
+06/2020
+Script uses the openpyxl and selenium libaries of python
+in order to scrape data about points of interest and restaurants
+from TripAdvisor to put into an excel worksheet
+'''
 import time, os
 from openpyxl import Workbook
 from selenium import webdriver
 
+'''Setup driver for Chrome'''
 driver = webdriver.Chrome('/usr/local/bin/chromedriver') 
 driver.set_window_size(1200, 700)
 driver.implicitly_wait(10)
@@ -51,16 +59,23 @@ see_more[0].click()
 names = []
 reviews = []
 urls = []
+#alternate class name
 anchors = driver.find_elements_by_class_name('attractions-attraction-overview-pois-PoiInfo__name--SJ0a4')
-for a in anchors:
-    urls.append(a.get_attribute('href'))
-    place = a.find_element_by_tag_name('h3')
-    names.append(place.text)
+if anchors:
+    for a in anchors:
+        urls.append(a.get_attribute('href'))
+        place = a.find_element_by_tag_name('h3')
+        names.append(place.text)
+else:
+    anchors = driver.find_elements_by_class_name('_255i5rcQ')
+    for a in anchors:
+        urls.append(a.get_attribute('href'))
+        names.append(a.text)
 numbers = driver.find_elements_by_class_name('reviewCount')
 for n in numbers:
     reviews.append(n.text)
 # print(urls)
-# print(names)
+print(names)
 # print(reviews)
 
 '''Collect Restaurants'''
@@ -78,7 +93,6 @@ dining_prices = []
 dining_reviews = []
 dining_urls = []
 
-# cards = driver.find_elements_by_class_name('_2Q7zqOgW')
 time.sleep(2)
 for d in driver.find_elements_by_class_name('_15_ydu6b'):
     dining_names.append(d.text)
@@ -89,8 +103,7 @@ for style in driver.find_elements_by_class_name('_3d9EnJpt'):
     dining_categories.append(stats[0].text)
     dining_prices.append(stats[1].text)
 
-print(dining_categories)
-print(dining_prices)
+print(dining_names)
 '''Quit driver'''
 driver.quit()
 
@@ -99,12 +112,25 @@ if names:
     os.chdir('./files/')
     wb = Workbook()
     ws = wb.active
-    ws.title = "Tallahassee Points of Interest"
-    ws['A1'] = "Location Names"
+    ws.title = "Points of Interest"
+    ws['A1'] = "Location Name"
     ws['B1'] = "Review Count"
     ws['C1'] = "Links"
     for x in range(len(names)):
         ws.cell(row=x+2,column=1,value=names[x])
         ws.cell(row=x+2,column=2,value=reviews[x])
         ws.cell(row=x+2,column=3,value=urls[x])
+    if dining_names:
+        ws1 = wb.create_sheet("Restaurants")
+        ws1['A1'] = "Restaurant Name"
+        ws1['B1'] = "Cuisine Categories"
+        ws1['C1'] = "Price Level"
+        ws1['D1'] = "Review Count"
+        ws1['E1'] = "Links"
+        for y in range(len(dining_names)):
+            ws1.cell(row=y+2,column=1,value=dining_names[y])
+            ws1.cell(row=y+2,column=2,value=dining_categories[y])
+            ws1.cell(row=y+2,column=3,value=dining_prices[y])
+            ws1.cell(row=y+2,column=4,value=dining_reviews[y])
+            ws1.cell(row=y+2,column=5,value=dining_urls[y])
     wb.save('tallahassee_tourism.xlsx')
