@@ -10,6 +10,19 @@ import time, os
 from openpyxl import Workbook
 from selenium import webdriver
 
+'''Prompt Input'''
+yes = False
+acceptable = ['y', 'Y', 'Yes', 'yes']
+print('Outputted Excel files will be in ./files')
+while not yes:
+    print('What location would you like to visit?')
+    print('Format: City State/Country') 
+    print('Example: Dallas Texas, London United Kingdom')
+    location = input('Enter: ')
+    confirm = input('Are you sure? (y/n) ')
+    if confirm in acceptable:
+        yes = True
+
 '''Setup driver for Chrome'''
 driver = webdriver.Chrome('/usr/local/bin/chromedriver') 
 driver.set_window_size(1200, 700)
@@ -23,7 +36,7 @@ elements = driver.find_elements_by_name('q')
 #     print(i.get_attribute('aria-label'))
 search = elements[1]
 search.click()
-search.send_keys('Tallahassee')
+search.send_keys(location)
 search.submit()
 
 '''Overview of City'''
@@ -49,9 +62,9 @@ see_more = driver.find_elements_by_class_name('attractions-attraction-overview-m
 if not see_more:
     see_more = driver.find_elements_by_class_name('_3EzqC0V4')
 #scrolls to element
-driver.execute_script("arguments[0].scrollIntoView();", see_more[0])
+driver.execute_script('arguments[0].scrollIntoView();', see_more[0])
 #scrolls a little up
-driver.execute_script("window.scrollBy(0, -80);")
+driver.execute_script('window.scrollBy(0, -80);')
 time.sleep(3)
 see_more[0].click()
 
@@ -79,7 +92,7 @@ print(names)
 # print(reviews)
 
 '''Collect Restaurants'''
-driver.execute_script("window.scrollTo(0, 0)")
+driver.execute_script('window.scrollTo(0, 0)')
 restaurant = driver.find_elements_by_id('global-nav-restaurants')
 if not restaurant:
     restaurant = driver.find_elements_by_class_name('_1T4t-FiN')
@@ -112,25 +125,26 @@ if names:
     os.chdir('./files/')
     wb = Workbook()
     ws = wb.active
-    ws.title = "Points of Interest"
-    ws['A1'] = "Location Name"
-    ws['B1'] = "Review Count"
-    ws['C1'] = "Links"
+    ws.title = 'Points of Interest'
+    ws['A1'] = 'Location Name'
+    ws['B1'] = 'Review Count'
+    ws['C1'] = 'Links'
     for x in range(len(names)):
         ws.cell(row=x+2,column=1,value=names[x])
         ws.cell(row=x+2,column=2,value=reviews[x])
         ws.cell(row=x+2,column=3,value=urls[x])
     if dining_names:
-        ws1 = wb.create_sheet("Restaurants")
-        ws1['A1'] = "Restaurant Name"
-        ws1['B1'] = "Cuisine Categories"
-        ws1['C1'] = "Price Level"
-        ws1['D1'] = "Review Count"
-        ws1['E1'] = "Links"
+        ws1 = wb.create_sheet('Restaurants')
+        ws1['A1'] = 'Restaurant Name'
+        ws1['B1'] = 'Cuisine Categories'
+        ws1['C1'] = 'Price Level'
+        ws1['D1'] = 'Review Count'
+        ws1['E1'] = 'Links'
         for y in range(len(dining_names)):
             ws1.cell(row=y+2,column=1,value=dining_names[y])
             ws1.cell(row=y+2,column=2,value=dining_categories[y])
             ws1.cell(row=y+2,column=3,value=dining_prices[y])
             ws1.cell(row=y+2,column=4,value=dining_reviews[y])
             ws1.cell(row=y+2,column=5,value=dining_urls[y])
-    wb.save('tallahassee_tourism.xlsx')
+    excel_name = location + ' Tourism.xlsx'
+    wb.save(excel_name)
