@@ -1,8 +1,10 @@
 import openpyxl, os, csv
 os.chdir('./files/')
-wb = openpyxl.load_workbook('tallahassee_tourism.xlsx')
+workbook = input('Filename that you want to convert: ')
+wb = openpyxl.load_workbook(workbook)
 sh = wb.active
-with open('tallahassee_tourism.csv', 'w', newline="") as f:
+workbook = workbook[:-5] + '.csv'
+with open(workbook, 'w', newline="") as f:
     c = csv.writer(f)
     for r in sh.rows:
         c.writerow([cell.value for cell in r])

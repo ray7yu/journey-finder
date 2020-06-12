@@ -54,7 +54,11 @@ driver.switch_to.window(currWindow)
 attractions = driver.find_elements_by_class_name('_1yB-kafB')
 if not attractions:
     print('empty')
-attractions[1].click()
+if attractions[0].get_attribute('title') == 'Travel Advice':
+    index = 2
+else:
+    index = 1
+attractions[index].click()
 
 '''Scrolls and makes more locations available'''
 #Fixes major bug by checking alternate class name
@@ -65,7 +69,7 @@ if not see_more:
 driver.execute_script('arguments[0].scrollIntoView();', see_more[0])
 #scrolls a little up
 driver.execute_script('window.scrollBy(0, -80);')
-time.sleep(3)
+time.sleep(1)
 see_more[0].click()
 
 '''Collect attractions'''
@@ -85,11 +89,13 @@ else:
         urls.append(a.get_attribute('href'))
         names.append(a.text)
 numbers = driver.find_elements_by_class_name('reviewCount')
+if not numbers:
+    numbers = driver.find_elements_by_class_name('_1DasOrRF')
 for n in numbers:
     reviews.append(n.text)
 # print(urls)
 print(names)
-# print(reviews)
+print(reviews)
 
 '''Collect Restaurants'''
 driver.execute_script('window.scrollTo(0, 0)')
@@ -106,15 +112,19 @@ dining_prices = []
 dining_reviews = []
 dining_urls = []
 
-time.sleep(2)
+time.sleep(1.5)
 for d in driver.find_elements_by_class_name('_15_ydu6b'):
     dining_names.append(d.text)
     dining_urls.append(d.get_attribute('href'))
 dining_reviews = [r.text for r in driver.find_elements_by_class_name('w726Ki5B')]
 for style in driver.find_elements_by_class_name('_3d9EnJpt'):
     stats = style.find_elements_by_class_name('EHA742uW')
-    dining_categories.append(stats[0].text)
-    dining_prices.append(stats[1].text)
+    if len(stats) < 2:
+        dining_categories.append('')
+        dining_prices.append(stats[0].text)
+    else:
+        dining_categories.append(stats[0].text)
+        dining_prices.append(stats[1].text)
 
 print(dining_names)
 '''Quit driver'''
