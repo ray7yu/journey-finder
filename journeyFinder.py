@@ -9,6 +9,7 @@ from TripAdvisor to put into an excel worksheet
 import time, os
 from openpyxl import Workbook
 from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
 
 '''Prompt Input'''
 yes = False
@@ -58,66 +59,35 @@ city_name = url_elem[2]
 attraction_url = 'https://www.tripadvisor.com/Attractions-' + city_id + '-Activities-oa30-' + city_name + '.html'
 restaurant_url = 'https://www.tripadvisor.com/Restaurants-' + city_id + '-' + city_name + '.html'
 
-# '''Scrolls and makes more locations available'''
-# #Fixes major bug by checking alternate class name
-# see_more = driver.find_elements_by_class_name('attractions-attraction-overview-main-TopPOIs__see_more--2Vsb-')
-# if not see_more:
-#     see_more = driver.find_elements_by_class_name('_1Cs4RmC_')
-# #scrolls to element
-# driver.execute_script('arguments[0].scrollIntoView();', see_more[0])
-# #scrolls a little up
-# driver.execute_script('window.scrollBy(0, -80);')
-# time.sleep(1)
-# see_more[0].click()
-
 '''Collect attractions'''
 names = []
 categories = []
 reviews = []
 urls = []
-# alternate class name
-# anchors = driver.find_elements_by_class_name('attractions-attraction-overview-pois-PoiInfo__name--SJ0a4')
-# if anchors:
-#     for a in anchors:
-#         urls.append(a.get_attribute('href'))
-#         place = a.find_element_by_tag_name('h3')
-#         names.append(place.text)
-# else:
-#     anchors = driver.find_elements_by_class_name('_3W3bcspL')
-#     for a in anchors:
-#         urls.append(a.get_attribute('href'))
-#         names.append(a.text)
-# numbers = driver.find_elements_by_class_name('reviewCount')
-# if not numbers:
-#     numbers = driver.find_elements_by_class_name('_1DasOrRF')
-# for n in numbers:
-#     reviews.append(n.text)
+
 '''First List'''
 driver.get(attraction_url)
-pages = driver.find_elements_by_class_name('pageNumbers')
-for p in pages:
-    print(p.text)
-
-driver.execute_script('arguments[0].scrollIntoView();', pages[0])
-driver.execute_script('window.scrollBy(0, -80);')
-time.sleep(1)
-pages[0].click()
-time.sleep(2)
-cards = driver.find_elements_by_class_name('_6sUF3jUd')
-for c in cards:
-    category = c.find_element_by_class_name('_21qUqkJx')
-    categories.append(category.text)
-    url = c.find_element_by_class_name('_1QKQOve4')
-    urls.append(url.get_attribute('href'))
-    place = url.find_element_by_tag_name('h2')
-    names.append(place.text)
-    review = c.find_element_by_class_name('_1KK223I5')
-    reviews.append(review.text)
-
+i = 0
+while i < 2:
+    pageNums = driver.find_elements_by_class_name('pageNum')
+    driver.execute_script('arguments[0].scrollIntoView();', pageNums[i])
+    driver.execute_script('window.scrollBy(0, 90);')
+    pageNums[i].click()
+    cards = driver.find_elements_by_class_name('_6sUF3jUd')
+    for c in cards:
+        category = c.find_element_by_class_name('_21qUqkJx')
+        categories.append(category.text)
+        url = c.find_element_by_class_name('_1QKQOve4')
+        urls.append(url.get_attribute('href'))
+        place = url.find_element_by_tag_name('h2')
+        names.append(place.text)
+        review = c.find_element_by_class_name('_1KK223I5')
+        reviews.append(review.text)
+    i += 1
 print(names)
-print(categories)
-print(urls)
-print(reviews)
+# print(categories)
+# print(urls)
+# print(reviews)
 
 '''Collect Restaurants'''
 driver.get(restaurant_url)
@@ -128,49 +98,62 @@ dining_prices = []
 dining_reviews = []
 dining_urls = []
 
-time.sleep(1.5)
-for d in driver.find_elements_by_class_name('_15_ydu6b'):
-    dining_names.append(d.text)
-    dining_urls.append(d.get_attribute('href'))
-dining_reviews = [r.text for r in driver.find_elements_by_class_name('w726Ki5B')]
-for style in driver.find_elements_by_class_name('_3d9EnJpt'):
-    stats = style.find_elements_by_class_name('EHA742uW')
-    if len(stats) < 2:
-        dining_categories.append('')
-        dining_prices.append(stats[0].text)
-    else:
-        dining_categories.append(stats[0].text)
-        dining_prices.append(stats[1].text)
+i = 1
+while True:
+    time.sleep(1)
+    cards = driver.find_elements_by_class_name('_2Q7zqOgW')
+    for c in cards:
+        d = c.find_element_by_class_name('_15_ydu6b')
+        dining_names.append(d.text)
+        dining_urls.append(d.get_attribute('href'))
+        r = c.find_element_by_class_name('w726Ki5B')
+        dining_reviews.append(r.text)
+        style = c.find_element_by_class_name('_3d9EnJpt')
+        stats = style.find_elements_by_class_name('EHA742uW')
+        if len(stats) < 2:
+            dining_categories.append('')
+            dining_prices.append(stats[0].text)
+        else:
+            dining_categories.append(stats[0].text)
+            dining_prices.append(stats[1].text)
+    i += 1
+    if i == 5:
+        break
+    pageNums = driver.find_elements_by_class_name('pageNum')
+    driver.execute_script('arguments[0].scrollIntoView();', pageNums[i])
+    driver.execute_script('window.scrollBy(0, 90);')
+    pageNums[i-1].click()
 
-print(dining_names)
 '''Quit driver'''
 driver.quit()
 
-# '''Write to Excel file'''
-# if names:
-#     os.chdir('./files/')
-#     wb = Workbook()
-#     ws = wb.active
-#     ws.title = 'Points of Interest'
-#     ws['A1'] = 'Location Name'
-#     ws['B1'] = 'Review Count'
-#     ws['C1'] = 'Links'
-#     for x in range(len(names)):
-#         ws.cell(row=x+2,column=1,value=names[x])
-#         ws.cell(row=x+2,column=2,value=reviews[x])
-#         ws.cell(row=x+2,column=3,value=urls[x])
-#     if dining_names:
-#         ws1 = wb.create_sheet('Restaurants')
-#         ws1['A1'] = 'Restaurant Name'
-#         ws1['B1'] = 'Cuisine Categories'
-#         ws1['C1'] = 'Price Level'
-#         ws1['D1'] = 'Review Count'
-#         ws1['E1'] = 'Links'
-#         for y in range(len(dining_names)):
-#             ws1.cell(row=y+2,column=1,value=dining_names[y])
-#             ws1.cell(row=y+2,column=2,value=dining_categories[y])
-#             ws1.cell(row=y+2,column=3,value=dining_prices[y])
-#             ws1.cell(row=y+2,column=4,value=dining_reviews[y])
-#             ws1.cell(row=y+2,column=5,value=dining_urls[y])
-#     excel_name = location + ' Tourism.xlsx'
-#     wb.save(excel_name)
+'''Write to Excel file'''
+if names:
+    os.chdir('./files/')
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'Points of Interest'
+    ws['A1'] = 'Location Name'
+    ws['B1'] = 'Type'
+    ws['C1'] = 'Review Count'
+    ws['D1'] = 'Links'
+    for x in range(len(names)):
+        ws.cell(row=x+2,column=1,value=names[x])
+        ws.cell(row=x+2,column=2,value=categories[x])
+        ws.cell(row=x+2,column=3,value=reviews[x])
+        ws.cell(row=x+2,column=4,value=urls[x])
+    if dining_names:
+        ws1 = wb.create_sheet('Restaurants')
+        ws1['A1'] = 'Restaurant Name'
+        ws1['B1'] = 'Cuisine Categories'
+        ws1['C1'] = 'Price Level'
+        ws1['D1'] = 'Review Count'
+        ws1['E1'] = 'Links'
+        for y in range(len(dining_names)):
+            ws1.cell(row=y+2,column=1,value=dining_names[y])
+            ws1.cell(row=y+2,column=2,value=dining_categories[y])
+            ws1.cell(row=y+2,column=3,value=dining_prices[y])
+            ws1.cell(row=y+2,column=4,value=dining_reviews[y])
+            ws1.cell(row=y+2,column=5,value=dining_urls[y])
+    excel_name = location + ' Tourism.xlsx'
+    wb.save(excel_name)
