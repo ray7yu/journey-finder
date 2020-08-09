@@ -30,11 +30,8 @@ driver.set_window_size(1200, 700)
 driver.implicitly_wait(10)
 driver.get('http://www.tripadvisor.com/') 
 
-#Major issue was that first search bar was hidden and not interactable
-#Search bar
+'''Search City'''
 elements = driver.find_elements_by_name('q')
-# for i in elements:
-#     print(i.get_attribute('aria-label'))
 search = elements[1]
 search.click()
 search.send_keys(location)
@@ -65,7 +62,6 @@ categories = []
 reviews = []
 urls = []
 
-'''First List'''
 driver.get(attraction_url)
 i = 0
 while i < 2:
@@ -84,7 +80,7 @@ while i < 2:
         review = c.find_element_by_class_name('_1KK223I5')
         reviews.append(review.text)
     i += 1
-print(names)
+# print(names)
 # print(categories)
 # print(urls)
 # print(reviews)
@@ -124,6 +120,7 @@ while True:
     driver.execute_script('window.scrollBy(0, 90);')
     pageNums[i-1].click()
 
+# print(dining_names)
 '''Quit driver'''
 driver.quit()
 
