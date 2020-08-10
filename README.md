@@ -1,10 +1,13 @@
 # journey-finder
 ## Description
-A python script that allows the user to scrape 150+ Points of Interest and Restaurant data from [Trip Advisor](https://www.tripadvisor.com/) through the use of Chrome Driver. Once the location is confirmed, the automated driver will go to TripAdvisor.com and scrape and compile data, outputting an Excel file in the files directory. 
+A python script that allows the user to scrape 150+ Points of Interest and Restaurant data from [Tripadvisor.com](https://www.tripadvisor.com/) through the use of Chrome Driver. Once the location is confirmed, the automated driver will go to Trip Advisor and scrape and compile data, outputting an Excel file in the files directory. 
 ## Requirements
-Python 3, Google Chrome Browser, Selenium and Openpyxl libraries for Python
+Python 3, Google Chrome Browser, Chrome Driver, Selenium and Openpyxl libraries for Python
 ## Installation
-Use <code>pip install selenium</code> and <code>pip install openpyxl</code> to download packages.
+Use <code>pip install selenium</code> and <code>pip install openpyxl</code> to download packages. </br>
+</br>
+ChromeDriver is also required. For installation, click [HERE](https://sites.google.com/a/chromium.org/chromedriver/) for instructions. </br>
+After ChromeDriver installation, navigate to journeyFinder.py and change the PATH variable to the filepath where ChromeDriver is installed on your local machine
 ## Execution
 ### Webscraper
 To run, input <code>python3 journeyFinder.py</code> in terminal. </br>
