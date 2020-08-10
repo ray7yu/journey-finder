@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 '''
 Raymond Yu
-06/2020
 Script uses the openpyxl and selenium libaries of python
 in order to scrape data about points of interest and restaurants
 from TripAdvisor to put into an excel worksheet

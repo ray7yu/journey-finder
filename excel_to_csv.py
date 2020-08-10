@@ -1,3 +1,11 @@
+#! /usr/bin/env python3
+'''
+Raymond Yu
+Script uses openpyxl and csv libaries of python
+in order to convert .xlsx data into two .csv files,
+one including points-of-interest data 
+and another including restaurant data
+'''
 import openpyxl, os, csv
 os.chdir('./files/')
 workbook = input('Filename that you want to convert: ')
