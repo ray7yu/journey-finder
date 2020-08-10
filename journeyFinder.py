@@ -9,7 +9,6 @@ from TripAdvisor to put into an excel worksheet
 import time, os
 from openpyxl import Workbook
 from selenium import webdriver
-from selenium.webdriver.common.action_chains import ActionChains
 
 '''Prompt Input'''
 yes = False
@@ -102,8 +101,11 @@ while True:
         d = c.find_element_by_class_name('_15_ydu6b')
         dining_names.append(d.text)
         dining_urls.append(d.get_attribute('href'))
-        r = c.find_element_by_class_name('w726Ki5B')
-        dining_reviews.append(r.text)
+        r = c.find_elements_by_class_name('w726Ki5B')
+        if r:
+            dining_reviews.append(r[0].text)
+        else:
+            dining_reviews.append('Not found')
         style = c.find_element_by_class_name('_3d9EnJpt')
         stats = style.find_elements_by_class_name('EHA742uW')
         if len(stats) < 2:
