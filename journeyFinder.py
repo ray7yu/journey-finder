@@ -9,6 +9,7 @@ import time, os
 from openpyxl import Workbook
 from selenium import webdriver
 
+PATH = '/usr/local/bin/chromedriver'
 '''Prompt Input'''
 yes = False
 acceptable = ['y', 'Y', 'Yes', 'yes']
@@ -23,7 +24,7 @@ while not yes:
         yes = True
 
 '''Setup driver for Chrome'''
-driver = webdriver.Chrome('/usr/local/bin/chromedriver') 
+driver = webdriver.Chrome(PATH) 
 driver.set_window_size(1200, 700)
 driver.implicitly_wait(10)
 driver.get('http://www.tripadvisor.com/') 
@@ -64,19 +65,30 @@ driver.get(attraction_url)
 i = 0
 while i < 2:
     pageNums = driver.find_elements_by_class_name('pageNum')
-    driver.execute_script('arguments[0].scrollIntoView();', pageNums[i])
-    driver.execute_script('window.scrollBy(0, 90);')
-    pageNums[i].click()
+    if len(pageNums) != 1:
+        driver.execute_script('arguments[0].scrollIntoView();', pageNums[i])
+        driver.execute_script('window.scrollBy(0, 90);')
+        pageNums[i].click()
+    else:
+        previous = driver.find_elements_by_class_name('previous')
+        previous[0].click()
+        i = 1
     cards = driver.find_elements_by_class_name('_6sUF3jUd')
     for c in cards:
-        category = c.find_element_by_class_name('_21qUqkJx')
-        categories.append(category.text)
+        category = c.find_elements_by_class_name('_21qUqkJx')
+        if category:
+            categories.append(category[0].text)
+        else:
+            categories.append('NOT FOUND')
         url = c.find_element_by_class_name('_1QKQOve4')
         urls.append(url.get_attribute('href'))
         place = url.find_element_by_tag_name('h2')
         names.append(place.text)
-        review = c.find_element_by_class_name('_1KK223I5')
-        reviews.append(review.text)
+        review = c.find_elements_by_class_name('_1KK223I5')
+        if review:
+            reviews.append(review[0].text)
+        else:
+            reviews.append('NOT FOUND')
     i += 1
 # print(names)
 # print(categories)
@@ -94,7 +106,7 @@ dining_urls = []
 
 i = 1
 while True:
-    time.sleep(1)
+    time.sleep(3)
     cards = driver.find_elements_by_class_name('_2Q7zqOgW')
     for c in cards:
         d = c.find_element_by_class_name('_15_ydu6b')
@@ -104,20 +116,31 @@ while True:
         if r:
             dining_reviews.append(r[0].text)
         else:
-            dining_reviews.append('Not found')
+            dining_reviews.append('NOT FOUND')
+        #Possible optimization?
         style = c.find_element_by_class_name('_3d9EnJpt')
         stats = style.find_elements_by_class_name('EHA742uW')
         if len(stats) < 2:
-            dining_categories.append('')
-            dining_prices.append(stats[0].text)
+            if len(stats) == 0:
+                dining_categories.append('NOT FOUND')
+                dining_prices.append('NOT FOUND')
+            elif stats[0].text[0] == '$':
+                dining_categories.append('NOT FOUND')
+                dining_prices.append(stats[0].text)
+            else:
+                dining_categories.append(stats[0].text)
+                dining_prices.append('NOT FOUND')
         else:
             dining_categories.append(stats[0].text)
             dining_prices.append(stats[1].text)
     i += 1
     if i == 5:
         break
+    time.sleep(2)
     pageNums = driver.find_elements_by_class_name('pageNum')
-    driver.execute_script('arguments[0].scrollIntoView();', pageNums[i])
+    if i-1 >= len(pageNums):
+        break
+    driver.execute_script('arguments[0].scrollIntoView();', pageNums[i-1])
     driver.execute_script('window.scrollBy(0, 90);')
     pageNums[i-1].click()
 
